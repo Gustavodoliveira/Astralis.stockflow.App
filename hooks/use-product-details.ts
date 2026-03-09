@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
 import { API_ENDPOINTS } from '@/constants/api';
+import { useCallback, useState } from 'react';
 
 interface LoteDetails {
   id: number;
@@ -43,8 +43,14 @@ export function useProductDetails(): UseProductDetailsReturn {
   const [error, setError] = useState<string | null>(null);
 
   const fetchProductDetails = useCallback(async (productId: string) => {
-    if (!productId) {
+    if (!productId || productId.trim() === '') {
       setError('ID do produto é obrigatório');
+      return;
+    }
+
+    // Verificar se a API_BASE_URL está configurada
+    if (!API_ENDPOINTS.BASE) {
+      setError('API não configurada. Verifique a configuração de ambiente.');
       return;
     }
 
@@ -71,6 +77,11 @@ export function useProductDetails(): UseProductDetailsReturn {
 
       const data = await response.json();
       console.log("📋 Lotes do produto:", data);
+      
+      // Verificação de segurança dos dados
+      if (!data) {
+        throw new Error('Resposta da API está vazia');
+      }
       
       // Processar a resposta da API de lotes
       let lotesData: LoteDetails[] = [];
