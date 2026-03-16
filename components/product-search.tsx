@@ -1,10 +1,10 @@
 import Input from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useSearchProducts } from "@/hooks/use-search-products";
 import { useLotesByLocation } from "@/hooks/use-lotes-by-location";
+import { useSearchProducts } from "@/hooks/use-search-products";
 import React from "react";
-import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface ProductSearchProps {
   onProductSelect?: (product: any) => void;
@@ -247,12 +247,8 @@ export default function ProductSearch({
         </ThemedText>
       )}
 
-      <FlatList
-        data={dataToRender}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+      <ScrollView
         style={styles.resultsList}
-        ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={
@@ -260,8 +256,15 @@ export default function ProductSearch({
             ? styles.emptyContainer
             : { paddingBottom: 20 }
         }
-        extraData={dataToRender.length}
-      />
+      >
+        {dataToRender.length === 0
+          ? renderEmptyState()
+          : dataToRender.map((item, index) => (
+              <View key={item.id?.toString() || index.toString()}>
+                {renderItem({ item, index })}
+              </View>
+            ))}
+      </ScrollView>
     </ThemedView>
   );
 }
